@@ -62,22 +62,36 @@ jobs:
             echo "No ANDROID_KEYSTORE_BASE64 provided. Building unsigned/testing release APK..."
           fi
 
-      - name: 8. Grant Gradle Execute Permissions
+      - name: Make Gradle executable
         run: |
           if [ -f gradlew ]; then
             chmod +x gradlew
           fi
 
-      - name: 9. Diagnostic Toolchain Verification
+      - name: Generate debug keystore
         run: |
-          echo "=== Android Build Toolchain Diagnostics ==="
-          java -version
-          if [ -f gradlew ]; then
-            ./gradlew --version
-            ./gradlew :app:dependencies --configuration debugCompileClasspath | grep -E "kotlin|compose" | head -n 30 || true
+          if [ ! -f debug.keystore ]; then
+            keytool -genkeypair \
+              -v \
+              -keystore debug.keystore \
+              -storepass android \
+              -alias androiddebugkey \
+              -keypass android \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -dname "CN=Android Debug,O=Android,C=US"
           fi
 
-      - name: 10. Build Debug & Release APKs
+      - name: Clean
+        run: |
+          if [ -f gradlew ]; then
+            ./gradlew clean
+          else
+            gradle clean
+          fi
+
+      - name: Build Debug & Release APKs
         env:
           BUILD_NUMBER: ${{ github.run_number }}
           VERSION_NAME: "1.0.${{ github.run_number }}"
@@ -92,7 +106,7 @@ jobs:
             gradle assembleDebug assembleRelease --stacktrace
           fi
 
-      - name: 11. Locate & Organize APK Artifacts
+      - name: Locate & Organize APK Artifacts
         if: always()
         run: |
           echo "=== Build Output Diagnostics ==="
@@ -119,12 +133,11 @@ jobs:
           
           ls -la artifacts/ || true
 
-      - name: 12. Upload APK Artifacts
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: AI-Workspace-APKs
-          path: artifacts/
-          retention-days: 30
+          name: Claude-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
 
       - name: 13. Create GitHub Release (On Push to Main / Dispatch)
         if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch')
