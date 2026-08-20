@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Required for communicating with AI model provider APIs (NVIDIA, Gemini, OpenAI, Anthropic, Groq, OpenRouter) and GitHub API -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Required for real-time speech input & voice assistant features in Voice Studio -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- Required for taking photos of documents or code for multimodal vision models -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Required for selecting local media/image attachments to upload into AI chats -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <!-- Required on Android 13+ to notify users when background agent tasks complete -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MyApplication">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/Theme.MyApplication">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

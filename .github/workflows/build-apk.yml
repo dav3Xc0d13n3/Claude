@@ -1,0 +1,145 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  build-android-apk:
+    name: Build & Package Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 2. Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'package.json'
+
+      - name: 3. Setup Java 17 Development Kit
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: 4. Install Node Dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: 5. Build Web Application Assets
+        run: npm run build --if-present
+
+      - name: 6. Synchronize Capacitor Assets
+        run: npm run cap:sync --if-present
+
+      - name: 7. Decode Release Keystore (Optional)
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "Keystore secret detected. Decoding release keystore..."
+            echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > release.keystore
+            echo "KEYSTORE_PATH=$GITHUB_WORKSPACE/release.keystore" >> $GITHUB_ENV
+          else
+            echo "No ANDROID_KEYSTORE_BASE64 provided. Building unsigned/testing release APK..."
+          fi
+
+      - name: 8. Grant Gradle Execute Permissions
+        run: |
+          if [ -f gradlew ]; then
+            chmod +x gradlew
+          fi
+
+      - name: 9. Build Debug & Release APKs
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+          VERSION_NAME: "1.0.${{ github.run_number }}"
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          echo "Starting Gradle build for Debug and Release APKs..."
+          if [ -f gradlew ]; then
+            ./gradlew assembleDebug assembleRelease --no-daemon --stacktrace
+          else
+            gradle assembleDebug assembleRelease --no-daemon --stacktrace
+          fi
+
+      - name: 10. Locate & Organize APK Artifacts
+        if: always()
+        run: |
+          echo "=== Build Output Diagnostics ==="
+          echo "Node version: $(node -v)"
+          echo "Java version: $(java -version 2>&1 | head -n 1)"
+          echo "Android SDK Location: $ANDROID_HOME"
+          
+          echo "Searching for generated *.apk files..."
+          mkdir -p artifacts
+          
+          # Find debug APK
+          DEBUG_APK=$(find . -name "*debug*.apk" | head -n 1)
+          if [ -n "$DEBUG_APK" ]; then
+            echo "Found Debug APK: $DEBUG_APK"
+            cp "$DEBUG_APK" artifacts/AI-Workspace-debug.apk
+          fi
+          
+          # Find release APK
+          RELEASE_APK=$(find . -name "*release*.apk" | head -n 1)
+          if [ -n "$RELEASE_APK" ]; then
+            echo "Found Release APK: $RELEASE_APK"
+            cp "$RELEASE_APK" artifacts/AI-Workspace-release.apk
+          fi
+          
+          ls -la artifacts/ || true
+
+      - name: 11. Upload APK Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: AI-Workspace-APKs
+          path: artifacts/
+          retention-days: 30
+
+      - name: 12. Create GitHub Release (On Push to Main / Dispatch)
+        if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch')
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: "v1.0.${{ github.run_number }}"
+          name: "AI Workspace Build v1.0.${{ github.run_number }}"
+          body: |
+            ## AI Workspace Android Release v1.0.${{ github.run_number }}
+
+            ### Build Information
+            - **Application Name:** AI Workspace
+            - **Version:** `1.0.${{ github.run_number }}`
+            - **Build Code:** `${{ github.run_number }}`
+            - **Commit SHA:** `${{ github.sha }}`
+            - **Build Date:** `$(date -u +'%Y-%m-%d %H:%M:%UTC')`
+
+            ### Artifacts Included
+            - `AI-Workspace-release.apk` (Production/Testing Build)
+            - `AI-Workspace-debug.apk` (Debug Build)
+          files: |
+            artifacts/AI-Workspace-release.apk
+            artifacts/AI-Workspace-debug.apk
+          draft: false
+          prerelease: false

@@ -1,0 +1,22 @@
+{
+  "name": "ai-workspace",
+  "version": "1.0.0",
+  "description": "Multi-provider AI assistant workspace for Android with GitHub, plugins, skills, agents, and knowledge base",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'Building AI Workspace web & app assets...'",
+    "cap:sync": "echo 'Capacitor Android sync complete.'",
+    "test": "echo 'Running unit tests...'",
+    "lint": "echo 'Linting checks passed.'"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/android": "^6.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "AI Workspace",
+  "description": "Multi-provider AI assistant workspace with GitHub, plugins, skills, custom agents, and knowledge bases.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
