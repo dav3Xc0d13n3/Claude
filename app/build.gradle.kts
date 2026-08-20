@@ -11,12 +11,12 @@ plugins {
 
 android {
   namespace = "com.example"
-  compileSdk { version = release(36) { minorApiLevel = 1 } }
+  compileSdk = 35
 
   defaultConfig {
     applicationId = "com.example.aiworkspace"
     minSdk = 24
-    targetSdk = 36
+    targetSdk = 35
     versionCode = System.getenv("BUILD_NUMBER")?.toIntOrNull() ?: System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
     versionName = System.getenv("VERSION_NAME") ?: "1.0.0"
 

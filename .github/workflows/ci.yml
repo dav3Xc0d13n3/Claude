@@ -52,7 +52,7 @@ jobs:
         run: |
           if [ -f gradlew ]; then
             chmod +x gradlew
-            ./gradlew testDebugUnitTest --no-daemon
+            ./gradlew testDebugUnitTest
           else
-            gradle testDebugUnitTest --no-daemon
+            gradle testDebugUnitTest
           fi

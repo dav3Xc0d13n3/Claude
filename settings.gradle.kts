@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "Claude AI Workspace"
+rootProject.name = "AI Workspace"
 
 include(":app")
