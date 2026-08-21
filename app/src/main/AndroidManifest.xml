@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example"
     xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Required for communicating with AI model provider APIs (NVIDIA, Gemini, OpenAI, Anthropic, Groq, OpenRouter) and GitHub API -->
@@ -23,7 +24,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication">
         <activity
-            android:name=".MainActivity"
+            android:name="com.example.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:windowSoftInputMode="adjustResize"

@@ -14,6 +14,7 @@ android {
     applicationId = "com.example.aiworkspace"
     minSdk = 24
     targetSdk = 35
+    multiDexEnabled = true
     versionCode = System.getenv("BUILD_NUMBER")?.toIntOrNull() ?: System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
     versionName = System.getenv("VERSION_NAME") ?: "1.0.0"
 
