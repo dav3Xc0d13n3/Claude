@@ -126,7 +126,7 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             try {
                 repository.initializeDefaultDataIfNeeded()
             } catch (e: Exception) {

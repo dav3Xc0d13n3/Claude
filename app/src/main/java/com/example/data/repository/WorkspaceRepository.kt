@@ -3,7 +3,9 @@ package com.example.data.repository
 import com.example.BuildConfig
 import com.example.data.local.AppDatabase
 import com.example.data.model.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 import java.util.UUID
 
 class WorkspaceRepository(private val db: AppDatabase) {
@@ -31,7 +33,7 @@ class WorkspaceRepository(private val db: AppDatabase) {
     }
 
     // Seed default workspace, providers, skills, plugins, agents on app first launch
-    suspend fun initializeDefaultDataIfNeeded() {
+    suspend fun initializeDefaultDataIfNeeded() = withContext(Dispatchers.IO) {
         val defaultGeminiKey = ""
 
         // Initialize Providers if empty
