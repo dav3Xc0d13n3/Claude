@@ -1,6 +1,8 @@
 # Keep MainActivity and all app components
 -keep class com.example.** { *; }
 -keepclassmembers class com.example.** { *; }
+-keep class com.example.aiworkspace.** { *; }
+-keepclassmembers class com.example.aiworkspace.** { *; }
 
 # Keep Room entities, DAOs, and database
 -keep class * extends androidx.room.RoomDatabase

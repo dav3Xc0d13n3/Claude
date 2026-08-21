@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-  namespace = "com.example"
+  namespace = "com.example.aiworkspace"
   compileSdk = 35
 
   defaultConfig {

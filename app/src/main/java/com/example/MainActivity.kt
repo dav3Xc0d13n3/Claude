@@ -1,4 +1,4 @@
-package com.example
+package com.example.aiworkspace
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
