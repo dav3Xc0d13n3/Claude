@@ -58,9 +58,14 @@ fun ChatScreen(
     var inputText by remember { mutableStateOf("") }
 
     // Auto-scroll on new message
-    LaunchedEffect(messages.size, streamText) {
-        if (messages.isNotEmpty() || streamText.isNotEmpty()) {
-            listState.animateScrollToItem((messages.size + if (streamText.isNotEmpty()) 1 else 0))
+    LaunchedEffect(messages.size, streamText, thinkingText) {
+        val totalCount = messages.size + (if (streamText.isNotEmpty()) 1 else 0) + (if (thinkingText.isNotEmpty()) 1 else 0)
+        if (totalCount > 0) {
+            try {
+                listState.animateScrollToItem(totalCount - 1)
+            } catch (e: Exception) {
+                // Ignore scroll index error
+            }
         }
     }
 

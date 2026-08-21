@@ -127,16 +127,28 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
 
     init {
         viewModelScope.launch {
-            repository.initializeDefaultDataIfNeeded()
+            try {
+                repository.initializeDefaultDataIfNeeded()
+            } catch (e: Exception) {
+                android.util.Log.e("WorkspaceViewModel", "Error initializing repository data", e)
+            }
         }
         initTts()
     }
 
     private fun initTts() {
-        tts = TextToSpeech(getApplication()) { status ->
-            if (status == TextToSpeech.SUCCESS) {
-                tts?.language = Locale.US
+        try {
+            tts = TextToSpeech(getApplication()) { status ->
+                if (status == TextToSpeech.SUCCESS) {
+                    try {
+                        tts?.language = Locale.US
+                    } catch (e: Exception) {
+                        android.util.Log.w("WorkspaceViewModel", "Failed to set TTS language", e)
+                    }
+                }
             }
+        } catch (e: Exception) {
+            android.util.Log.w("WorkspaceViewModel", "TTS service unavailable on this device", e)
         }
     }
 
@@ -197,9 +209,21 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
             val currentProvider = providerList.find { it.type == _selectedProviderType.value }
             var apiKey = currentProvider?.apiKey ?: ""
 
-            // Fallback if key empty
-            if (_selectedProviderType.value == ProviderType.GEMINI && apiKey.isBlank()) {
-                apiKey = ""
+            if (apiKey.isBlank() && _selectedProviderType.value != ProviderType.GEMINI) {
+                val noKeyMsg = ChatMessageEntity(
+                    id = UUID.randomUUID().toString(),
+                    chatId = chatId,
+                    sender = MessageSender.ASSISTANT,
+                    content = "Configure an API provider to start chatting. You can set your API key in Settings or the Provider Manager.",
+                    thinkingContent = "No API key found for provider ${_selectedProviderType.value.name}.",
+                    modelUsed = _selectedModelId.value,
+                    timestamp = System.currentTimeMillis()
+                )
+                repository.addMessage(noKeyMsg)
+                _isGenerating.value = false
+                _currentStreamText.value = ""
+                _currentThinkingText.value = ""
+                return@launch
             }
 
             val history = currentMessages.value.map { Pair(it.sender.name, it.content) } + Pair("USER", userText)
@@ -220,17 +244,21 @@ class WorkspaceViewModel(application: Application) : AndroidViewModel(applicatio
             """.trimIndent()
 
             var fullText = ""
-            AiApiClient.generateChatStream(
-                providerType = _selectedProviderType.value,
-                apiKey = apiKey,
-                baseUrl = currentProvider?.baseUrl ?: "",
-                modelId = _selectedModelId.value,
-                systemInstruction = systemInstruction,
-                messages = history,
-                imageBase64 = imageBase64
-            ).collect { chunk ->
-                fullText += chunk
-                _currentStreamText.value = fullText
+            try {
+                AiApiClient.generateChatStream(
+                    providerType = _selectedProviderType.value,
+                    apiKey = apiKey,
+                    baseUrl = currentProvider?.baseUrl ?: "",
+                    modelId = _selectedModelId.value,
+                    systemInstruction = systemInstruction,
+                    messages = history,
+                    imageBase64 = imageBase64
+                ).collect { chunk ->
+                    fullText += chunk
+                    _currentStreamText.value = fullText
+                }
+            } catch (e: Exception) {
+                fullText = "API Connection Error: ${e.localizedMessage ?: "Network or provider unavailable."}\n\nConfigure an API provider in Settings to start chatting."
             }
 
             // Save assistant message to Room DB
