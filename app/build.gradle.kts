@@ -15,6 +15,7 @@ android {
     minSdk = 24
     targetSdk = 35
     multiDexEnabled = true
+    multiDexKeepProguard = file("proguard-rules.pro")
     versionCode = System.getenv("BUILD_NUMBER")?.toIntOrNull() ?: System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
     versionName = System.getenv("VERSION_NAME") ?: "1.0.0"
 
@@ -89,6 +90,7 @@ dependencies {
   implementation(libs.androidx.compose.ui.graphics)
   implementation(libs.androidx.compose.ui.tooling.preview)
   implementation(libs.androidx.core.ktx)
+  implementation("androidx.multidex:multidex:2.0.1")
   // implementation(libs.androidx.datastore.preferences)
   implementation(libs.androidx.lifecycle.runtime.compose)
   implementation(libs.androidx.lifecycle.runtime.ktx)
