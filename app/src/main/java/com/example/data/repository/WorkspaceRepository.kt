@@ -1,6 +1,6 @@
 package com.example.data.repository
 
-import com.example.BuildConfig
+import com.example.aiworkspace.BuildConfig
 import com.example.data.local.AppDatabase
 import com.example.data.model.*
 import kotlinx.coroutines.Dispatchers

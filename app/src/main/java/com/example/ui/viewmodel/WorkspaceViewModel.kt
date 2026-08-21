@@ -4,7 +4,7 @@ import android.app.Application
 import android.speech.tts.TextToSpeech
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.BuildConfig
+import com.example.aiworkspace.BuildConfig
 import com.example.data.api.AiApiClient
 import com.example.data.local.AppDatabase
 import com.example.data.model.*

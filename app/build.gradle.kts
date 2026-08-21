@@ -1,5 +1,6 @@
 plugins {
   alias(libs.plugins.android.application)
+  alias(libs.plugins.kotlin.android)
   alias(libs.plugins.kotlin.compose)
   alias(libs.plugins.google.devtools.ksp)
   alias(libs.plugins.roborazzi)
@@ -9,6 +10,12 @@ plugins {
 android {
   namespace = "com.example.aiworkspace"
   compileSdk = 35
+
+  sourceSets {
+    getByName("main") {
+      java.srcDirs("src/main/java", "src/main/kotlin")
+    }
+  }
 
   defaultConfig {
     applicationId = "com.example.aiworkspace"
@@ -57,6 +64,9 @@ android {
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
+  }
+  kotlinOptions {
+    jvmTarget = "17"
   }
   buildFeatures {
     compose = true
